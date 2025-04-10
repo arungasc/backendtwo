@@ -48,25 +48,21 @@ app.post("/post", async (req, res) => {
 });
 
 // Login Route
-app.post("/login", async (req, res) => {
+// Login route
+app.post('/login', async (req, res) => {
   const { userInput, pwd } = req.body;
+  const user = await User.findOne({ 
+    $or: [{ email: userInput }, { pno: userInput }], 
+    pwd 
+  });
 
-  try {
-    const user = await User.findOne({
-      $or: [{ email: userInput }, { pno: userInput }]
-    });
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (user.pwd !== pwd) {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
-
-    res.status(200).json({ message: "Login successful", user });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
+  if (user) {
+    res.json({ message: "Login success", name: user.name });  // name send pannunga
+  } else {
+    res.status(401).json({ message: "Invalid credentials" });
   }
 });
+
 
 const PORT = process.env.PORT || 7000;
 app.listen(PORT, () => {
